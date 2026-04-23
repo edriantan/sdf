@@ -1,11 +1,11 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GameCanvas extends JComponent implements Runnable {
+
 
     public BufferedImage grass;
     public boolean up, down, left, right;
@@ -16,19 +16,23 @@ public class GameCanvas extends JComponent implements Runnable {
     public final int maxRow = 16;
     Thread gameThread;
 
-    Player p;
-
+    Player p1, p2;
     public GameCanvas(){
 
+        this.p1 = new Player(this);
+        this.p2 = new Player(this);
+        p1.setP2(p2);
+
         try {
-            grass = ImageIO.read(new File("GRASS.png"));
+            grass = ImageIO.read(getClass().getResource("/GRASS.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.p = new Player(this);
         this.setPreferredSize(new Dimension(1008,768));
         this.setDoubleBuffered(true);
+        connectToServer();
         startThread();
+
     }
 
     public void startThread(){
@@ -63,22 +67,26 @@ public class GameCanvas extends JComponent implements Runnable {
                 delta --;
                 actualFPS ++;
             }
-            if (timer >= 1000000000){
-                System.out.println("FPS: " + actualFPS);
-                actualFPS = 0;
-                timer = 0;
-            }
+            // if (timer >= 1000000000){
+            //     System.out.println("FPS: " + actualFPS);
+            //     actualFPS = 0;
+            //     timer = 0;
+            // }
         }
     }
-
-    public void update(){
-        p.update();
+    private void connectToServer(){
+        p1.connectToServer();
     }
-
+    public void update(){
+        p1.update();
+    }
+   
     @Override
     protected void paintComponent(Graphics g){
+        super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(grass, 0, 0, scaledSize, scaledSize, null);
-        p.draw(g2d);
+        p1.draw(g2d);
+        p2.draw(g2d);
     }    
 }
